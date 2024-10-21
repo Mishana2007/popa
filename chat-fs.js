@@ -308,21 +308,6 @@ bot.on('callback_query', (query) => {
         });
     }
 
-    // Обработка выбора периода для анализа
-    if (data.startsWith('start_analysis_')) {
-
-        bot.editMessageText(`Начинаем анализ за ${period}.`, {
-            chat_id: chatId,
-            message_id: messageId,
-            reply_markup: {
-                inline_keyboard: [
-                    [{ text: 'Меню', callback_data: 'menu' }]
-                ]
-            }
-        });
-        // Здесь вы можете добавить функцию для выполнения анализа сообщений
-    }
-
     // Обработка кнопки "Каналы"
     if (data === 'channels') {
         // Получаем все уникальные каналы из базы данных
@@ -430,94 +415,7 @@ bot.on('callback_query', (query) => {
         });
     }
 
-    // if (data === 'analysis') {
-    //     // Отправляем сообщение с выбором периода для анализа
-    //     bot.sendMessage(chatId, 'Выберите период для анализа сообщений:', {
-    //         reply_markup: {
-    //             inline_keyboard: [
-    //                 [{ text: '1 день', callback_data: 'start_analysis_1_day' }],
-    //                 [{ text: '3 дня', callback_data: 'start_analysis_3_days' }],
-    //                 [{ text: 'Все время', callback_data: 'start_analysis_all_time' }]
-    //             ]
-    //         }
-    //     });
-    // }
-
-    // if (data === 'channels') {
-    //     // Получаем все уникальные каналы из базы данных
-    //     db.all('SELECT DISTINCT chat_title FROM messages', (err, rows) => {
-    //         if (err) {
-    //             return bot.sendMessage(chatId, 'Ошибка при получении каналов.');
-    //         }
-
-    //         if (rows.length === 0) {
-    //             return bot.sendMessage(chatId, 'Нет подключенных каналов.');
-    //         }
-
-    //         // Формируем инлайн-кнопки для каждого канала
-    //         const channelButtons = rows.map(row => {
-    //             return [{ text: row.chat_title, callback_data: `channel_${row.chat_title}` }];
-    //         });
-
-    //         bot.sendMessage(chatId, 'Подключенные каналы:', {
-    //             reply_markup: {
-    //                 inline_keyboard: channelButtons
-    //             }
-    //         });
-    //     });
-    // }
-
-    // // Если пользователь выбрал конкретный канал
-    // if (data.startsWith('channel_')) {
-    //     const channelName = data.replace('channel_', '');
-
-    //     // Получаем количество сообщений из выбранного канала
-    //     db.get('SELECT COUNT(*) as message_count FROM messages WHERE chat_title = ?', [channelName], (err, row) => {
-    //         if (err) {
-    //             return bot.sendMessage(chatId, 'Ошибка при получении данных о канале.');
-    //         }
-
-    //         bot.sendMessage(chatId, `Канал: ${channelName}\nКоличество сообщений: ${row.message_count}`, {
-    //             reply_markup: {
-    //                 inline_keyboard: [
-    //                     [{ text: 'Удалить', callback_data: `delete_channel_${channelName}` }],
-    //                     [{ text: 'Назад', callback_data: 'channels' }]
-    //                 ]
-    //             }
-    //         });
-    //     });
-    // }
-
-    // // Обработка удаления сообщений из канала
-    // if (data.startsWith('delete_channel_')) {
-    //     const channelName = data.replace('delete_channel_', '');
-
-    //     // Удаляем все сообщения из указанного канала
-    //     db.run('DELETE FROM messages WHERE chat_title = ?', [channelName], function(err) {
-    //         if (err) {
-    //             return bot.sendMessage(chatId, 'Ошибка при удалении сообщений.');
-    //         }
-
-    //         bot.sendMessage(chatId, `Все сообщения из канала ${channelName} были удалены.`);
-    //     });
-    // }
 })
-
-// // Обрабатываем команду /start
-// bot.onText(/\/start/, (msg) => {
-//     const chatId = msg.chat.id;
-
-//     // Отправляем приветственное сообщение и три инлайн кнопки
-//     bot.sendMessage(chatId, 'Выберите период для анализа сообщений:', {
-//         reply_markup: {
-//             inline_keyboard: [
-//                 [{ text: '1 день', callback_data: 'start_analysis_1_day' }],
-//                 [{ text: '3 дня', callback_data: 'start_analysis_3_days' }],
-//                 [{ text: 'Все время', callback_data: 'start_analysis_all_time' }]
-//             ]
-//         }
-//     });
-// });
 
 // Обрабатываем нажатие на кнопки
 bot.on('callback_query', (callbackQuery) => {
@@ -545,18 +443,6 @@ bot.on('callback_query', (callbackQuery) => {
         bot.sendMessage(chatId, 'Начинаю анализ сообщений...');
         sendMessagesToGPTAndReturnAnalysis(chatId);
     }
-});
-
-// Закрытие подключения к базе данных
-process.on('SIGINT', () => {
-    db.close((err) => {
-        if (err) {
-            console.error('Ошибка при закрытии базы данных:', err.message);
-        } else {
-            console.log('Подключение к базе данных закрыто.');
-        }
-        process.exit(0);
-    });
 });
 
 // Логируем получение всех сообщений и сохраняем их в базе данных
